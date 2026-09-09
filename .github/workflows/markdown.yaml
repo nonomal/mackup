@@ -1,13 +1,16 @@
-name: Lint Markdown
+name: markdown
 on:
-  - pull_request
-  - push
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
 
-  mdl:
+  rumdl:
     runs-on: ubuntu-latest
-    container: rsrchboy/mdl
     steps:
-      - uses: actions/checkout@v2
-      - run: mdl .
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --all-extras --dev
+      - run: uv run rumdl check .

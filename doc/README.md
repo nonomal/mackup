@@ -1,20 +1,45 @@
 # Configuration
 
-All the configuration is done in a file named `.mackup.cfg` stored at the
-root of your home folder.
+> 💡 **New to Mackup?** Check out the
+> [Architecture Guide](ARCHITECTURE.md) to understand how Mackup works
+> under the hood.
 
-To configure Mackup, create a file named `.mackup.cfg` in your home directory.
+All the configuration is done in a file named `.mackup.cfg` stored at the
+root of your home folder. This location can be overridden via environment
+variables or the `--config-file` command-line option.
+
+To configure Mackup, create a file named `.mackup.cfg` in your home
+directory.
 
 ```bash
 vi ~/.mackup.cfg
 ```
+
+## Configuration file location
+
+Config files are searched in the following order. If none is found, Mackup will
+use the default config location of `~/.mackup.cfg`
+
+- `~/.mackup.cfg`
+- `$MACKUP_CONFIG`
+- `$XDG_CONFIG_HOME/mackup/mackup.cfg` or `~/.config/mackup/mackup.cfg`
+
+You can also specify a custom config file location using the `--config-file`
+command-line option:
+
+```bash
+mackup --config-file ~/.mackup-custom.cfg backup
+```
+
+The path can be absolute or relative to your home directory. Note that the
+config file must be located within your home directory for security reasons.
 
 ## Storage
 
 You can specify the storage type Mackup will use to store your configuration
 files.
 
-For now, you have 4 options: `dropbox`, `google_drive`, `icloud`, `copy` and `file_system`.
+For now, you have 4 options: `dropbox`, `google_drive`, `icloud` and `file_system`.
 
 If none is specified, Mackup will try to use the default: `dropbox`.
 With the `dropbox` storage engine, Mackup will automatically figure out your
@@ -39,19 +64,19 @@ engine = google_drive
 
 ### iCloud
 
+If you choose the `iCloud` storage engine, Mackup will store your
+configuration files in the `~/Library/Mobile\ Documents/com\~apple\~CloudDocs/`
+folder.
+
 ```ini
 [storage]
 engine = icloud
 ```
 
-### Copy
+You can check if your files are synced using:
 
-If you choose the `copy` storage engine, Mackup will figure out
-where your Copy folder is and store your configuration files in it.
-
-```ini
-[storage]
-engine = copy
+```sh
+brctl monitor com.apple.CloudDocs
 ```
 
 ### File System
@@ -71,7 +96,7 @@ path = some/folder/in/your/home
 ```
 
 Note: you don't need to escape spaces or wrap the path in quotes.
-For example, the following paths are valid :
+For example, the following paths are valid:
 
 ```ini
 path = some/path in your/home
@@ -80,7 +105,7 @@ path = /some path/in/your/root
 
 ### Custom Directory Name
 
-You can customize the directory name in which Mackup stores your file. By
+You can customize the directory name in which Mackup stores your files. By
 default, if not specified, Mackup creates a `Mackup` directory in the storage
 engine you chose, e.g. `~/Dropbox/Mackup`.
 
@@ -114,16 +139,16 @@ If you ever change your mind and switch storage solutions after Mackup is
 already setup (ex: from `dropbox` to `icloud`), complete the following steps.
 
 1. Run `mackup uninstall` on all computers
-1. Copy your Mackup files to the new storage location
-1. Change the storage provider details in your `.mackup.cfg` file (see above)
-1. Run `mackup backup` on the main computer and `mackup restore` on all others
+2. Copy your Mackup files to the new storage location
+3. Change the storage provider details in your `.mackup.cfg` file (see above)
+4. Run `mackup backup` on the main computer and `mackup restore` on all others
 
 ## Applications
 
 ### Only sync one or two applications
 
 In your home folder, create a file named `.mackup.cfg` and add the application
-names to allow in the `[applications_to_sync]` section, one by line.
+names to allow in the `[applications_to_sync]` section, one per line.
 
 ```ini
 # Example, to only sync SSH and Adium:
@@ -136,7 +161,7 @@ Use `mackup list` to get a list of valid application names. Don't use fancy
 names (with spaces) here.
 
 A [sample](.mackup.cfg) of this file is available in this folder. Just copy it
-in your home folder:
+to your home folder:
 
 ```bash
 cp mackup/doc/.mackup.cfg ~/
@@ -145,7 +170,7 @@ cp mackup/doc/.mackup.cfg ~/
 ### Don't sync an application
 
 In your home folder, create a file named `.mackup.cfg` and add the application
-names to ignore in the `[applications_to_ignore]` section, one by line.
+names to ignore in the `[applications_to_ignore]` section, one per line.
 
 ```ini
 # Example, to not sync SSH and Adium:
@@ -158,7 +183,7 @@ Use `mackup list` to get a list of valid application names. Don't use fancy
 names (with spaces) here.
 
 A [sample](.mackup.cfg) of this file is available in this folder. Just copy it
-in your home folder:
+to your home folder:
 
 ```bash
 cp mackup/doc/.mackup.cfg ~/
@@ -179,14 +204,14 @@ to get your Pull Request merged faster.
 You can customize the Mackup engine and add support for unsupported
 applications or just custom files and directories you'd like to sync.
 
-NOTE: Files and directory to be synced should be rooted at $HOME.
+NOTE: Files and directories to be synced should be rooted at $HOME.
 
 Let's say that you'd like to add support for Nethack (config file:
-`.nethackrc`) and for the `bin` and `.hidden` directories you keep in your
-home.
+`.nethackrc`), for the `bin` and `.hidden` directories and for the
+`.gitignore` file you keep in your home.
 
 In your home, create a `.mackup` directory and add a config file for the
-application you'd like to support.
+application you'd like to support:
 
 ```bash
 mkdir ~/.mackup
@@ -194,7 +219,24 @@ touch ~/.mackup/nethack.cfg
 touch ~/.mackup/my-files.cfg
 ```
 
-Edit those files
+#### Custom applications directory location
+
+Custom application configs are searched in the following order:
+
+1. `~/.mackup/` (legacy location, takes priority)
+2. `$XDG_CONFIG_HOME/mackup/applications/` or `~/.config/mackup/applications/`
+
+If the same application config exists in both locations, the legacy location
+(`~/.mackup/`) takes priority.
+
+For XDG-compliant setups, you can use:
+
+```bash
+mkdir -p ~/.config/mackup/applications
+touch ~/.config/mackup/applications/nethack.cfg
+```
+
+Edit those files:
 
 ```bash
 $ nano ~/.mackup/nethack.cfg
@@ -213,9 +255,13 @@ name = My personal synced files and dirs
 [configuration_files]
 bin
 .hidden
+.gitignore
 ```
 
-You can run mackup to see if they are listed
+Note that Mackup assumes the file paths listed here are relative to your home
+directory.
+
+You can run mackup to see if they are listed:
 
 ```bash
 $ mackup list
@@ -235,7 +281,7 @@ mackup backup
 If you override an application config that is already supported by Mackup, your
 new config for this application will replace the one provided by Mackup.
 
-You can find some sample config in this directory.
+You can find some sample configs in this directory.
 
 ### Locally test an application before submitting a Pull Request
 
@@ -253,14 +299,14 @@ You can add and test an application by following these steps:
 
 ### Add support for an application using the XDG directory
 
-For application storing their configuration under the `~/.config` folder, you
+For applications storing their configuration under the `~/.config` folder, you
 should not hardcode it. The `.config` folder is the default location but it can
 be named differently on other users' systems by setting the `XDG_CONFIG_HOME`
 environment variable.
 
 See <https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 
-Mackup supports this mechanism and provide a dedicated `xdg_configuration_files`
+Mackup supports this mechanism and provides a dedicated `xdg_configuration_files`
 section for those applications.
 
 If any path starts with `.config`, remove the `.config` part and move the path

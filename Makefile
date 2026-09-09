@@ -1,23 +1,47 @@
-develop:
-	pipenv run python setup.py develop
-
-undevelop:
-	pipenv run python setup.py develop --uninstall
-
 lint:
-	# Install mdl with "gem install mdl"
-	mdl .
+	uv run rumdl check .
+
+ruff:
+	uv run ruff check .
+
+ty:
+	uv run ty check
 
 test:
-	pipenv run nosetests --with-coverage --cover-tests --cover-inclusive --cover-branches --cover-package=mackup
+	uv run pytest
+
+coverage:
+	uv run pytest --cov=mackup --cov-report=term --cov-report=html --cov-report=xml
+
+coverage-report:
+	uv run coverage report
+
+mypy:
+	uv run mypy src/mackup/
+
+check: lint ruff mypy ty test
+	@echo "All checks passed!"
 
 clean:
+	rm -rf src/mackup/__pycache__
+	rm -rf tests/__pycache__
 	rm -rf dist/
-	rm -rf Mackup.egg-info/
+	rm -rf htmlcov/
+	rm -rf .coverage
+	rm -rf coverage.xml
 
-release: clean
-	pipenv run python setup.py sdist
-	pipenv run twine upload dist/*
+# Cut a release in one command. Bumps the version, syncs the lockfile, then
+# commits, tags and pushes. The release workflow takes over from the tag push.
+# Bump level defaults to patch: `make release BUMP=minor` / `BUMP=major`,
+# or pin a version with `make release VERSION=1.2.3`.
+BUMP ?= patch
 
-black:
-	black --target-version py27 .
+release: check
+	@if [ -n "$(VERSION)" ]; then uv version "$(VERSION)"; else uv version --bump $(BUMP); fi
+	uv sync -U
+	@V=$$(uv version --short); \
+	git commit -am "Mackup $$V" && \
+	git tag "$$V" && \
+	git push && \
+	git push --tags && \
+	echo "Released $$V"

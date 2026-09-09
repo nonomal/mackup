@@ -1,13 +1,13 @@
 # Detailed install instructions for Mackup
 
-There are 2 ways to run mackup
+There are 2 ways to run mackup:
 
-1. Install it with Homebrew (OSX only)
-1. Install it with PIP (OSX and GNU/Linux)
+1. Install it with Homebrew (macOS and GNU/Linux)
+2. Install it with PIP (macOS and GNU/Linux)
 
 ## Install
 
-### With Homebrew (OSX only)
+### With Homebrew
 
 ```bash
 # Easy
@@ -17,16 +17,17 @@ brew install mackup
 mackup -h
 ```
 
-### With Homebrew (OSX only) master branch for latest updates
+### With Homebrew master branch for latest updates
 
-Want to install latest master releases instead of waiting on homebrew package version?
+Want to install the latest master release instead of waiting on the homebrew
+package version?
 
 [Homebrew reference](https://docs.brew.sh/Manpage#install-options-formulacask)
 
 ```bash
 # Install master
 brew install --HEAD
-# Check if are using the master or stale package
+# Check if you are using the master or stale package
 brew switch mackup <HEAD-XXXX>
 
 mackup -h
@@ -44,7 +45,7 @@ mackup -h
 
 ## Upgrade
 
-### Upgrade with Homebrew (OSX only)
+### Upgrade with Homebrew
 
 ```bash
 brew update
@@ -61,7 +62,7 @@ mackup -h
 
 ## Uninstall
 
-### Uninstall with Homebrew (OSX only)
+### Uninstall with Homebrew
 
 ```bash
 brew uninstall mackup
